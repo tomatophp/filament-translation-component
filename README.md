@@ -1,4 +1,4 @@
-![Screenshot of Login](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpeg)
+![Screenshot of Login](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpg)
 
 # Filament Translation Component
 

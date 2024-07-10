@@ -1,0 +1,34 @@
+<?php
+
+namespace TomatoPHP\FilamentTranslationComponent;
+
+use Illuminate\Support\ServiceProvider;
+
+
+class FilamentTranslationComponentServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //Register Config file
+        $this->mergeConfigFrom(__DIR__.'/../config/filament-translation-component.php', 'filament-translation-component');
+
+        //Publish Config
+        $this->publishes([
+           __DIR__.'/../config/filament-translation-component.php' => config_path('filament-translation-component.php'),
+        ], 'filament-translation-component-config');
+
+        //Register Lang
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-translation-component');
+
+        //Publish Lang
+        $this->publishes([
+            __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-translation-component'),
+        ], 'filament-translation-component-lang');
+
+    }
+
+    public function boot(): void
+    {
+        //you boot methods here
+    }
+}

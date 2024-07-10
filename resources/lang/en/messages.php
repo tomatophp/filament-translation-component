@@ -2,5 +2,7 @@
 
 return [
     "ar" => "Arabic",
-    "en" => "English"
+    "en" => "English",
+    "key" => "Language",
+    "value" => "Value",
 ];

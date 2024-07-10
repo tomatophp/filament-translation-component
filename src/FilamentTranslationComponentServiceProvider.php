@@ -25,6 +25,14 @@ class FilamentTranslationComponentServiceProvider extends ServiceProvider
             __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-translation-component'),
         ], 'filament-translation-component-lang');
 
+        //Register views
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-translation-component');
+
+        //Publish Views
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/filament-translation-component'),
+        ], 'filament-translation-component-views');
+
     }
 
     public function boot(): void

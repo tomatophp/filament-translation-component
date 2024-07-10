@@ -1,4 +1,4 @@
-![Screenshot of Login](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpg)
+![Cover](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpg)
 
 # Filament Translation Component
 
@@ -8,6 +8,12 @@
 [![Downloads](https://poser.pugx.org/tomatophp/filament-translation-component/d/total.svg)](https://packagist.org/packages/tomatophp/filament-translation-component)
 
 Translation Component as a key/value to use it with Spatie Translatable FilamentPHP Plugin
+
+## Screenshots
+
+![Light](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/light.png)
+![Dark](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/dark.png)
+
 
 ## Installation
 
@@ -24,10 +30,9 @@ use \TomatoPHP\FilamentTranslationComponent\Components\Translation;
 
 Translation::make('title')
     ->label('Title')
-    ->languages(['en', 'ar'])
 ```
 
-if you not set `->languages()` it will take the lang on the config file.
+you can change the language from the config file.
 
 ## Publish Assets
 

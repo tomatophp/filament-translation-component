@@ -7,28 +7,24 @@ use Filament\Forms\Components\TextInput;
 
 class Translation extends KeyValue
 {
-    protected array $lang = [];
+    protected string $view = 'filament-translation-component::components.translation';
+
+    public array $lang = [];
+
+
     protected function setUp(): void
     {
         $lang = [];
-        $getLang = count($this->lang) > 0 ? $this->lang : config('filament-translation-component.languages');
-        foreach ($getLang as $key=>$local){
+        foreach (config('filament-translation-component.languages') as $key=>$local){
             $lang[] = TextInput::make($key)
-                ->label(trans('filament-translation-component::messages.'.$key))
+                ->placeholder(trans('filament-translation-component::messages.'.$key))
                 ->required($this->isRequired());
         }
-        $this->keyLabel('language');
+        $this->keyLabel(trans('filament-translation-component::messages.key'));
+        $this->valueLabel(trans('filament-translation-component::messages.value'));
         $this->editableKeys(false);
         $this->addable(false);
         $this->deletable(false);
         $this->schema($lang);
-    }
-
-    public function languages(array $lang=[]): static
-    {
-        foreach ($lang as $item){
-            $this->lang[$item] = $item;
-        }
-        return $this;
     }
 }

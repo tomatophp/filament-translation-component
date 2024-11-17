@@ -18,5 +18,9 @@ return [
            "label" => "Burmese",
            "flag" => "mm"
        ],
+       "id" => [
+           "label" => "Indonesian",
+           "flag" => "id"
+       ],
    ]
 ];

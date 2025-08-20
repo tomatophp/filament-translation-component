@@ -3,7 +3,6 @@
 namespace TomatoPHP\FilamentTranslationComponent\Components;
 
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\TextInput;
 
 class Translation extends KeyValue
 {
@@ -11,20 +10,26 @@ class Translation extends KeyValue
 
     public array $lang = [];
 
+    public bool $textarea = false;
 
     protected function setUp(): void
     {
-        $lang = [];
-        foreach (config('filament-translation-component.languages') as $key=>$local){
-            $lang[] = TextInput::make($key)
-                ->placeholder(trans('filament-translation-component::messages.'.$key))
-                ->required($this->isRequired());
-        }
         $this->keyLabel(trans('filament-translation-component::messages.key'));
         $this->valueLabel(trans('filament-translation-component::messages.value'));
         $this->editableKeys(false);
         $this->addable(false);
         $this->deletable(false);
-        $this->schema($lang);
+    }
+
+    public function textarea(bool $value = true): static
+    {
+        $this->textarea = $value;
+
+        return $this;
+    }
+
+    public function isTextarea(): bool
+    {
+        return $this->textarea;
     }
 }

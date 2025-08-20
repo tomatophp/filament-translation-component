@@ -1,6 +1,10 @@
 @php
-    use Filament\Support\Facades\FilamentView;
-
+    $fieldWrapperView = $getFieldWrapperView();
+    $extraAttributeBag = $getExtraAttributeBag();
+    $canEditKeys = $canEditKeys();
+    $canEditValues = $canEditValues();
+    $keyPlaceholder = $getKeyPlaceholder();
+    $valuePlaceholder = $getValuePlaceholder();
     $debounce = $getLiveDebounce();
     $hasInlineLabel = $hasInlineLabel();
     $isAddable = $isAddable();
@@ -8,186 +12,161 @@
     $isDisabled = $isDisabled();
     $isReorderable = $isReorderable();
     $statePath = $getStatePath();
+    $livewireKey = $getLivewireKey();
+
+    $textarea = $isTextarea();
 @endphp
 
 <x-dynamic-component
-    :component="$getFieldWrapperView()"
+    :component="$fieldWrapperView"
     :field="$field"
     :has-inline-label="$hasInlineLabel"
+    class="fi-fo-key-value-wrp"
 >
-    <x-slot
-        name="label"
-        @class([
-            'sm:pt-1.5' => $hasInlineLabel,
-        ])
-    >
-        {{ $getLabel() }}
-    </x-slot>
-
     <x-filament::input.wrapper
         :disabled="$isDisabled"
         :valid="! $errors->has($statePath)"
         :attributes="
-            \Filament\Support\prepare_inherited_attributes($getExtraAttributeBag())
+            \Filament\Support\prepare_inherited_attributes($extraAttributeBag)
                 ->class(['fi-fo-key-value'])
         "
     >
         <div
-            @if (FilamentView::hasSpaMode())
-                ax-load="visible"
-            @else
-                ax-load
-            @endif
-            ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('key-value', 'filament/forms') }}"
-            wire:ignore
+            x-load
+            x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('key-value', 'filament/forms') }}"
             x-data="keyValueFormComponent({
                         state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
                     })"
-            x-ignore
+            wire:ignore
+            wire:key="{{ $livewireKey }}.{{
+                substr(md5(serialize([
+                    $isDisabled,
+                ])), 0, 64)
+            }}"
             {{
                 $attributes
                     ->merge($getExtraAlpineAttributes(), escape: false)
-                    ->class(['divide-y divide-gray-200 dark:divide-white/10'])
+                    ->class(['fi-fo-key-value-table-ctn'])
             }}
         >
-            <table
-                class="w-full table-auto divide-y divide-gray-200 dark:divide-white/5"
-            >
+            <table class="fi-fo-key-value-table">
                 <thead>
                     <tr>
-                    @if ($isReorderable && (! $isDisabled))
-                        <th
-                            scope="col"
-                            x-show="rows.length"
-                            class="w-9"
-                        ></th>
-                    @endif
+                        @if ($isReorderable && (! $isDisabled))
+                            <th
+                                scope="col"
+                                x-show="rows.length"
+                                class="fi-has-action"
+                            ></th>
+                        @endif
 
-                    <th
-                        scope="col"
-                        class="px-3 py-2 text-start text-sm font-medium text-gray-700 dark:text-gray-200"
-                    >
-                        {{ $getKeyLabel() }}
-                    </th>
+                        <th scope="col">
+                            {{ $getKeyLabel() }}
+                        </th>
 
-                    <th
-                        scope="col"
-                        class="px-3 py-2 text-start text-sm font-medium text-gray-700 dark:text-gray-200"
-                    >
-                        {{ $getValueLabel() }}
-                    </th>
+                        <th scope="col">
+                            {{ $getValueLabel() }}
+                        </th>
 
-                    @if ($isDeletable && (! $isDisabled))
-                        <th
-                            scope="col"
-                            x-show="rows.length"
-                            class="w-9"
-                        ></th>
-                    @endif
-                </tr>
+                        @if ($isDeletable && (! $isDisabled))
+                            <th
+                                scope="col"
+                                x-show="rows.length"
+                                class="fi-has-action"
+                            ></th>
+                        @endif
+                    </tr>
                 </thead>
 
                 <tbody
                     @if ($isReorderable)
                         x-on:end.stop="reorderRows($event)"
-                    x-sortable
-                    data-sortable-animation-duration="{{ $getReorderAnimationDuration() }}"
+                        x-sortable
+                        data-sortable-animation-duration="{{ $getReorderAnimationDuration() }}"
                     @endif
-                    class="divide-y divide-gray-200 dark:divide-white/5"
                 >
-                <template
-                    x-bind:key="index"
-                    x-for="(row, index) in rows"
-                >
-                    <tr
-                        @if ($isReorderable)
-                            x-bind:x-sortable-item="row.key"
-                        @endif
-                        class="divide-x  divide-gray-200 dark:divide-white/5 rtl:divide-x-reverse"
+                    <template
+                        x-bind:key="index"
+                        x-for="(row, index) in rows"
                     >
-                        @if ($isReorderable && (! $isDisabled))
-                            <td class="p-0.5">
-                                <div x-sortable-handle class="flex">
-                                    {{ $getAction('reorder') }}
-                                </div>
-                            </td>
-                        @endif
-
-                        <td class="w-32 p-0">
-                            <x-filament::input
-                                :disabled="(! $canEditKeys()) || $isDisabled"
-                                :placeholder="filled($placeholder = $getKeyPlaceholder()) ? $placeholder : null"
-                                type="hidden"
-                                x-model="row.key"
-                                :attributes="
-                                        \Filament\Support\prepare_inherited_attributes(
-                                            new \Illuminate\View\ComponentAttributeBag([
-                                                'x-on:input.debounce.' . ($debounce ?? '500ms') => 'updateState',
-                                            ])
-                                        )
-                                    "
-
-                            />
-                            @php
-                                $langLabels = [];
-                                foreach (config('filament-translation-component.languages') as $key=>$langItem){
-                                    $langLabels[$key] = [
-                                        'label' => trans('filament-translation-component::messages.'.$key),
-                                        'flag' => $langItem['flag']
-                                    ];
-
-                                }
-                            @endphp
-                            <div x-data="{lang: '{{ json_encode($langLabels) }}'}" class="flex justify-start gap-2 px-4">
-                                <div class="flex flex-col justify-center items-center">
+                        <tr
+                            @if ($isReorderable)
+                                x-bind:x-sortable-item="row.key"
+                            @endif
+                        >
+                            @if ($isReorderable && (! $isDisabled))
+                                <td class="fi-has-action">
                                     <div
-                                        @class([
-                                            'w-6 h-4 bg-cover bg-center'
-                                        ])
-                                        x-bind:style="'background-image: url(\'https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/'+JSON.parse(lang)[row.key].flag+'.svg\'); background-repeat: no-repeat;'"
+                                        x-sortable-handle
+                                        class="fi-fo-key-value-table-row-sortable-handle"
                                     >
+                                        {{ $getAction('reorder') }}
+                                    </div>
+                                </td>
+                            @endif
 
+                            <td>
+                                @php
+                                    $langLabels = [];
+                                    foreach (config('filament-translation-component.languages') as $key=>$langItem){
+                                        $langLabels[$key] = [
+                                            'label' => trans('filament-translation-component::messages.'.$key),
+                                            'flag' => $langItem['flag']
+                                        ];
+
+                                    }
+                                @endphp
+                                <div x-data="{lang: '{{ json_encode($langLabels) }}'}" class="fi-sidebar-group-btn" style="padding-left: 16px; padding-right: 16px;">
+                                    <div class="flex flex-col justify-center items-center">
+                                        <x-filament::avatar x-bind:src="'https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/'+JSON.parse(lang)[row.key].flag+'.svg'" :circular="false" size="sm" />
+                                    </div>
+                                    <div class="font-xs">
+                                        <b x-html="JSON.parse(lang)[row.key].label"></b>
                                     </div>
                                 </div>
-                                <div class="font-xs">
-                                    <div x-html="JSON.parse(lang)[row.key].label"></div>
-                                </div>
-                            </div>
-                        </td>
-
-                        <td class="w-1/1 p-0">
-                            <x-filament::input
-                                :disabled="(! $canEditValues()) || $isDisabled"
-                                :placeholder="filled($placeholder = $getValuePlaceholder()) ? $placeholder : null"
-                                type="text"
-                                x-model="row.value"
-                                :attributes="
-                                        \Filament\Support\prepare_inherited_attributes(
-                                            new \Illuminate\View\ComponentAttributeBag([
-                                                'x-on:input.debounce.' . ($debounce ?? '500ms') => 'updateState',
-                                            ])
-                                        )
-                                    "
-                            />
-                        </td>
-
-                        @if ($isDeletable && (! $isDisabled))
-                            <td class="p-0.5">
-                                <div x-on:click="deleteRow(index)">
-                                    {{ $getAction('delete') }}
-                                </div>
                             </td>
-                        @endif
-                    </tr>
-                </template>
+
+                            <td class="border">
+                                @if($textarea)
+                                <textarea
+                                    @disabled((! $canEditValues) || $isDisabled)
+                                    placeholder="{{ $valuePlaceholder }}"
+                                    type="text"
+                                    x-model="row.value"
+                                    x-on:input.debounce.{{ $debounce ?? '500ms' }}="updateState"
+                                    class="fi-input"
+                                    style="resize: none; width: 100%; padding-top: 5px;padding-bottom: 5px;padding-left: 16px; padding-right: 16px; outline: none; border: none; height: auto;"
+                                    rows="3"
+                                ></textarea>
+                                @else
+                                <input
+                                    @disabled((! $canEditValues) || $isDisabled)
+                                    placeholder="{{ $valuePlaceholder }}"
+                                    type="text"
+                                    x-model="row.value"
+                                    class="fi-input"
+                                />
+                                @endif
+                            </td>
+
+                            @if ($isDeletable && (! $isDisabled))
+                                <td class="fi-has-action">
+                                    <div x-on:click="deleteRow(index)">
+                                        {{ $getAction('delete') }}
+                                    </div>
+                                </td>
+                            @endif
+                        </tr>
+                    </template>
                 </tbody>
             </table>
 
             @if ($isAddable && (! $isDisabled))
-                <div class="flex justify-center px-3 py-2">
-                    <span x-on:click="addRow" class="flex">
-                        {{ $getAction('add') }}
-                    </span>
+                <div
+                    x-on:click="addRow"
+                    class="fi-fo-key-value-add-action-ctn"
+                >
+                    {{ $getAction('add') }}
                 </div>
             @endif
         </div>

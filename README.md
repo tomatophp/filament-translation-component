@@ -11,8 +11,10 @@ Translation Component as a key/value to use it with Spatie Translatable Filament
 
 ## Screenshots
 
-![Light](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/light.png)
-![Dark](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/dark.png)
+![Light Textarea](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/textarea-light.png)
+![Dark Textarea](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/textarea-dark.png)
+![Light Input](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/input-light.png)
+![Dark Input](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/input-dark.png)
 
 
 ## Installation
@@ -34,6 +36,18 @@ Translation::make('title')
 
 you can change the language from the config file.
 
+## Convert input to textarea
+
+```php
+use \TomatoPHP\FilamentTranslationComponent\Components\Translation;
+
+Translation::make('title')
+    ->label('Title')
+    ->textarea()
+```
+
+
+
 ## Publish Assets
 
 you can publish config file by use this command
@@ -46,6 +60,31 @@ you can publish languages file by use this command
 
 ```bash
 php artisan vendor:publish --tag="filament-translation-component-lang"
+```
+
+
+## Testing
+
+if you like to run `PEST` testing just use this command
+
+```bash
+composer test
+```
+
+## Code Style
+
+if you like to fix the code style just use this command
+
+```bash
+composer format
+```
+
+## PHPStan
+
+if you like to check the code by `PHPStan` just use this command
+
+```bash
+composer analyse
 ```
 
 ## Other Filament Packages

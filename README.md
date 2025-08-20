@@ -1,4 +1,4 @@
-![Cover](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpg)
+![Cover](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/fadymondy-tomato-translation-component.jpg)
 
 # Filament Translation Component
 

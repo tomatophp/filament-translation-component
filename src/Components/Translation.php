@@ -19,13 +19,13 @@ class Translation extends KeyValue
         $this->editableKeys(false);
         $this->addable(false);
         $this->deletable(false);
-        $this->default(fn()=>$this->getTranslatedLocales());
+        $this->default(fn () => $this->getTranslatedLocales());
     }
 
     public function getTranslatedLocales(): array
     {
         return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
-            return [$key => ""];
+            return [$key => ''];
         })->toArray();
     }
 

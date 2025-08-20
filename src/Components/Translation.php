@@ -19,6 +19,26 @@ class Translation extends KeyValue
         $this->editableKeys(false);
         $this->addable(false);
         $this->deletable(false);
+        $this->default(fn()=>$this->getTranslatedLocales());
+    }
+
+    public function getTranslatedLocales(): array
+    {
+        return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
+            return [$key => ""];
+        })->toArray();
+    }
+
+    public function lang(array $lang): static
+    {
+        $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getLang(): array
+    {
+        return $this->lang;
     }
 
     public function textarea(bool $value = true): static

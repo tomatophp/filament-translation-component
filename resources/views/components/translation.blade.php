@@ -113,7 +113,6 @@
                                             'label' => trans('filament-translation-component::messages.'.$key),
                                             'flag' => $langItem['flag']
                                         ];
-
                                     }
                                 @endphp
                                 <div x-data="{lang: '{{ json_encode($langLabels) }}'}" class="fi-sidebar-group-btn" style="padding-left: 16px; padding-right: 16px;">

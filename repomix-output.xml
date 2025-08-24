@@ -155,9 +155,14 @@ tests/
     DebugTest.php
     TestCase.php
   Pest.php
+.gitignore
+.php-cs-fixer.dist.php
+CODE_OF_CONDUCT.md
 composer.json
 fadymondy-translation-component.md
 LICENSE.md
+phpunit.xml
+pint.json
 README.md
 testbench.yaml
 </directory_structure>
@@ -281,117 +286,6 @@ jobs:
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-</file>
-
-<file path=".github/workflows/fix-php-code-styling.yml">
-name: 'PHP Code Styling'
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.php'
-
-permissions:
-  contents: write
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@v2
-
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Format Code"
-          commit_user_name: 'GitHub Actions'
-</file>
-
-<file path=".github/workflows/tests.yml">
-name: "Tests"
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.php'
-  pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - master
-    paths:
-      - '**.php'
-      - '.github/workflows/tests.yml'
-      - 'phpunit.xml.dist'
-      - 'composer.json'
-      - 'composer.lock'
-
-jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ubuntu-latest]
-        php: [8.4, 8.3, 8.2]
-        laravel: [12.*, 11.*]
-        stability: [prefer-stable]
-        include:
-          - laravel: 12.*
-            testbench: 10.*
-            carbon: 3.*
-            collision: 8.*
-          - laravel: 11.*
-            testbench: 9.*
-            carbon: 3.*
-            collision: 8.*
-        exclude:
-          - laravel: 11.*
-            php: 8.1
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache/files
-          key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: none
-
-      - name: Install Dependencies
-        run: |
-          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-
-      - name: Install Dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "nesbot/carbon:${{ matrix.carbon }}" "nunomaduro/collision:${{ matrix.collision }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
-          composer db
-
-      - name: Execute tests
-        run: vendor/bin/pest
 </file>
 
 <file path=".github/CONTRIBUTING.md">
@@ -2254,7 +2148,7 @@ abstract class TestCase extends BaseTestCase
 
             $config->set('view.paths', [
                 ...$config->get('view.paths'),
-                __DIR__.'/../resources/views',
+                __DIR__ . '/../resources/views',
             ]);
         });
     }
@@ -2267,6 +2161,203 @@ abstract class TestCase extends BaseTestCase
 use TomatoPHP\FilamentTranslationComponent\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);
+</file>
+
+<file path=".gitignore">
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+.DS_Store
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+/.zed
+</file>
+
+<file path=".php-cs-fixer.dist.php">
+<?php
+
+$finder = Symfony\Component\Finder\Finder::create()
+    ->notPath('bootstrap/*')
+    ->notPath('storage/*')
+    ->notPath('resources/view/mail/*')
+    ->in([
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
+    ])
+    ->name('*.php')
+    ->notName('*.blade.php')
+    ->ignoreDotFiles(true)
+    ->ignoreVCS(true);
+
+return (new PhpCsFixer\Config())
+    ->setRules([
+        '@PSR2' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'ordered_imports' => ['sort_algorithm' => 'alpha'],
+        'no_unused_imports' => true,
+        'not_operator_with_successor_space' => true,
+        'trailing_comma_in_multiline' => true,
+        'phpdoc_scalar' => true,
+        'unary_operator_spaces' => true,
+        'binary_operator_spaces' => true,
+        'blank_line_before_statement' => [
+            'statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try'],
+        ],
+        'phpdoc_single_line_var_spacing' => true,
+        'phpdoc_var_without_name' => true,
+        'method_argument_space' => [
+            'on_multiline' => 'ensure_fully_multiline',
+            'keep_multiple_spaces_after_comma' => true,
+        ]
+    ])
+    ->setFinder($finder);
+</file>
+
+<file path="CODE_OF_CONDUCT.md">
+# Contributor Covenant Code of Conduct
+
+## Our Pledge
+
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone, regardless of age, body
+size, visible or invisible disability, ethnicity, sex characteristics, gender
+identity and expression, level of experience, education, socio-economic status,
+nationality, personal appearance, race, religion, or sexual identity
+and orientation.
+
+We pledge to act and interact in ways that contribute to an open, welcoming,
+diverse, inclusive, and healthy community.
+
+## Our Standards
+
+Examples of behavior that contributes to a positive environment for our
+community include:
+
+* Demonstrating empathy and kindness toward other people
+* Being respectful of differing opinions, viewpoints, and experiences
+* Giving and gracefully accepting constructive feedback
+* Accepting responsibility and apologizing to those affected by our mistakes,
+  and learning from the experience
+* Focusing on what is best not just for us as individuals, but for the
+  overall community
+
+Examples of unacceptable behavior include:
+
+* The use of sexualized language or imagery, and sexual attention or
+  advances of any kind
+* Trolling, insulting or derogatory comments, and personal or political attacks
+* Public or private harassment
+* Publishing others' private information, such as a physical or email
+  address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a
+  professional setting
+
+## Enforcement Responsibilities
+
+Community leaders are responsible for clarifying and enforcing our standards of
+acceptable behavior and will take appropriate and fair corrective action in
+response to any behavior that they deem inappropriate, threatening, offensive,
+or harmful.
+
+Community leaders have the right and responsibility to remove, edit, or reject
+comments, commits, code, wiki edits, issues, and other contributions that are
+not aligned to this Code of Conduct, and will communicate reasons for moderation
+decisions when appropriate.
+
+## Scope
+
+This Code of Conduct applies within all community spaces, and also applies when
+an individual is officially representing the community in public spaces.
+Examples of representing our community include using an official e-mail address,
+posting via an official social media account, or acting as an appointed
+representative at an online or offline event.
+
+## Enforcement
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported to the community leaders responsible for enforcement at
+.
+All complaints will be reviewed and investigated promptly and fairly.
+
+All community leaders are obligated to respect the privacy and security of the
+reporter of any incident.
+
+## Enforcement Guidelines
+
+Community leaders will follow these Community Impact Guidelines in determining
+the consequences for any action they deem in violation of this Code of Conduct:
+
+### 1. Correction
+
+**Community Impact**: Use of inappropriate language or other behavior deemed
+unprofessional or unwelcome in the community.
+
+**Consequence**: A private, written warning from community leaders, providing
+clarity around the nature of the violation and an explanation of why the
+behavior was inappropriate. A public apology may be requested.
+
+### 2. Warning
+
+**Community Impact**: A violation through a single incident or series
+of actions.
+
+**Consequence**: A warning with consequences for continued behavior. No
+interaction with the people involved, including unsolicited interaction with
+those enforcing the Code of Conduct, for a specified period of time. This
+includes avoiding interactions in community spaces as well as external channels
+like social media. Violating these terms may lead to a temporary or
+permanent ban.
+
+### 3. Temporary Ban
+
+**Community Impact**: A serious violation of community standards, including
+sustained inappropriate behavior.
+
+**Consequence**: A temporary ban from any sort of interaction or public
+communication with the community for a specified period of time. No public or
+private interaction with the people involved, including unsolicited interaction
+with those enforcing the Code of Conduct, is allowed during this period.
+Violating these terms may lead to a permanent ban.
+
+### 4. Permanent Ban
+
+**Community Impact**: Demonstrating a pattern of violation of community
+standards, including sustained inappropriate behavior,  harassment of an
+individual, or aggression toward or disparagement of classes of individuals.
+
+**Consequence**: A permanent ban from any sort of public interaction within
+the community.
+
+## Attribution
+
+This Code of Conduct is adapted from the [Contributor Covenant][homepage],
+version 2.0, available at
+https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
+
+Community Impact Guidelines were inspired by [Mozilla's code of conduct
+enforcement ladder](https://github.com/mozilla/diversity).
+
+[homepage]: https://www.contributor-covenant.org
+
+For answers to common questions about this code of conduct, see the FAQ at
+https://www.contributor-covenant.org/faq. Translations are available at
+https://www.contributor-covenant.org/translations.
 </file>
 
 <file path="fadymondy-translation-component.md">
@@ -2284,6 +2375,76 @@ has_translations: true
 versions: [3,4]
 publish_date: 2024-07-10
 ---
+</file>
+
+<file path="LICENSE.md">
+The MIT License (MIT)
+
+Copyright (c)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</file>
+
+<file path="phpunit.xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         backupGlobals="false"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
+         cacheDirectory=".phpunit.cache"
+         backupStaticProperties="false"
+>
+    <testsuites>
+        <testsuite name="Tests">
+            <directory suffix=".php">./tests/</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_KEY" value="base64:yk+bUVuZa1p86Dqjk9OjVK2R1pm6XHxC6xEKFq8utH0="/>
+        <env name="DB_CONNECTION" value="testing"/>
+    </php>
+</phpunit>
+</file>
+
+<file path="pint.json">
+{
+    "preset": "laravel",
+    "rules": {
+        "blank_line_before_statement": true,
+        "concat_space": {
+            "spacing": "one"
+        },
+        "method_argument_space": true,
+        "single_trait_insert_per_statement": true,
+        "types_spaces": {
+            "space": "single"
+        }
+    }
+}
 </file>
 
 <file path="testbench.yaml">
@@ -2313,6 +2474,84 @@ workbench:
     api: false
     commands: false
     views: true
+</file>
+
+<file path=".github/workflows/tests.yml">
+name: "Tests"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.php'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - '.github/workflows/tests.yml'
+      - 'phpunit.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.4, 8.3, 8.2]
+        laravel: [12.*, 11.*]
+        stability: [prefer-stable]
+        include:
+          - laravel: 12.*
+            testbench: 10.*
+            carbon: 3.*
+            collision: 8.*
+          - laravel: 11.*
+            testbench: 9.*
+            carbon: 3.*
+            collision: 8.*
+        exclude:
+          - laravel: 11.*
+            php: 8.1
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          coverage: none
+
+      - name: Install Dependencies
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install Dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "nesbot/carbon:${{ matrix.carbon }}" "nunomaduro/collision:${{ matrix.collision }}" --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+          composer db
+
+      - name: Execute tests
+        run: vendor/bin/pest
 </file>
 
 <file path=".github/FUNDING.yml">
@@ -2363,6 +2602,134 @@ return [
     'da' => 'Denmark',
     'key' => 'Bahasa',
     'value' => 'Nilai',
+];
+</file>
+
+<file path=".github/workflows/fix-php-code-styling.yml">
+name: 'PHP Code Styling'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.php'
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Fix PHP code style issues
+        uses: aglipanci/laravel-pint-action@v2
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "Format Code"
+          commit_user_name: 'GitHub Actions'
+</file>
+
+<file path="resources/lang/my/messages.php">
+<?php
+
+return [
+    'ar' => 'အာရဗီ',
+    'en' => 'အင်္ဂလိပ်',
+    'pt_BR' => 'ပေါ်တူဂီ (ဘရာဇီ)',
+    'my' => 'မြန်မာ',
+    'id' => 'အင်ဒိုနီးရှား',
+    'fr' => 'ပြင်သစ်',
+    'es' => 'စပိန်',
+    'de' => 'ဂျာမန်',
+    'it' => 'အီတလီးယန်',
+    'ru' => 'ရုရှား',
+    'zh' => 'တရုတ်',
+    'ja' => 'ဂျပန်',
+    'ko' => 'ကိုရီးယား',
+    'hi' => 'ဟိန္ဒီ',
+    'th' => 'ထိုင်း',
+    'vi' => 'ဗီယက်နမ်',
+    'fa' => 'ပါရှန်',
+    'ur' => 'အူရဒီ',
+    'ms' => 'မလေး',
+    'fil' => 'ဖိလစ်ပိုင်',
+    'bn' => 'ဘင်္ဂလား',
+    'pl' => 'ပိုလန်',
+    'hu' => 'ဟန်ဂေရီ',
+    'cs' => 'ချက်',
+    'sk' => 'စလိုဗီယန်',
+    'uk' => 'ယူကရိန်',
+    'el' => 'ဂရိ',
+    'ro' => 'ရိုမေးနီးယား',
+    'hr' => 'ခရိုအေးရှား',
+    'sr' => 'ဆားဘီးယား',
+    'bg' => 'ဘူဂေးရီးယား',
+    'lt' => 'လီသူဝန်း',
+    'lv' => 'လတ်ဗီးယား',
+    'et' => 'အက်စတိုး',
+    'nl' => 'နယ်ပယ်',
+    'no' => 'နော်ဝေး',
+    'sv' => 'ဆွီဒီးယန်',
+    'da' => 'ဒိန်းမတ်း',
+    'key' => 'ဘာသာရပ်',
+    'value' => 'တန်ဖိုး',
+];
+</file>
+
+<file path="resources/lang/pt_BR/messages.php">
+<?php
+
+return [
+    'ar' => 'árabe',
+    'en' => 'Inglês',
+    'pt_BR' => 'Português (Brasil)',
+    'my' => 'birmanês',
+    'id' => 'Indonésio',
+    'fr' => 'Francês',
+    'es' => 'Espanhol',
+    'de' => 'Alemão',
+    'it' => 'Italiano',
+    'ru' => 'Russo',
+    'zh' => 'Chinês',
+    'ja' => 'Japonês',
+    'ko' => 'Coreano',
+    'hi' => 'Hindi',
+    'th' => 'Tailandês',
+    'vi' => 'Vietnamita',
+    'fa' => 'Persa',
+    'ur' => 'Urdu',
+    'ms' => 'Malaio',
+    'fil' => 'Filipino',
+    'bn' => 'Bengali',
+    'pl' => 'Polonês',
+    'hu' => 'Húngaro',
+    'cs' => 'Tcheco',
+    'sk' => 'Eslovaco',
+    'uk' => 'Ucraniano',
+    'el' => 'Grego',
+    'ro' => 'Romeno',
+    'hr' => 'Croata',
+    'sr' => 'Sérvio',
+    'bg' => 'Búlgaro',
+    'lt' => 'Lituano',
+    'lv' => 'Letão',
+    'et' => 'Estoniano',
+    'nl' => 'Holandês',
+    'no' => 'Norueguês',
+    'sv' => 'Sueco',
+    'da' => 'Dinamarquês',
+    'fi' => 'Finlandês',
+    'key' => 'Língua',
+    'value' => 'Valor',
 ];
 </file>
 
@@ -2482,7 +2849,6 @@ return [
                                             'label' => trans('filament-translation-component::messages.'.$key),
                                             'flag' => $langItem['flag']
                                         ];
-
                                     }
                                 @endphp
                                 <div x-data="{lang: '{{ json_encode($langLabels) }}'}" class="fi-sidebar-group-btn" style="padding-left: 16px; padding-right: 16px;">
@@ -2543,163 +2909,6 @@ return [
 </x-dynamic-component>
 </file>
 
-<file path="LICENSE.md">
-The MIT License (MIT)
-
-Copyright (c)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-</file>
-
-<file path="resources/lang/my/messages.php">
-<?php
-
-return [
-    'ar' => 'အာရဗီ',
-    'en' => 'အင်္ဂလိပ်',
-    'pt_BR' => 'ပေါ်တူဂီ (ဘရာဇီ)',
-    'my' => 'မြန်မာ',
-    'id' => 'အင်ဒိုနီးရှား',
-    'fr' => 'ပြင်သစ်',
-    'es' => 'စပိန်',
-    'de' => 'ဂျာမန်',
-    'it' => 'အီတလီးယန်',
-    'ru' => 'ရုရှား',
-    'zh' => 'တရုတ်',
-    'ja' => 'ဂျပန်',
-    'ko' => 'ကိုရီးယား',
-    'hi' => 'ဟိန္ဒီ',
-    'th' => 'ထိုင်း',
-    'vi' => 'ဗီယက်နမ်',
-    'fa' => 'ပါရှန်',
-    'ur' => 'အူရဒီ',
-    'ms' => 'မလေး',
-    'fil' => 'ဖိလစ်ပိုင်',
-    'bn' => 'ဘင်္ဂလား',
-    'pl' => 'ပိုလန်',
-    'hu' => 'ဟန်ဂေရီ',
-    'cs' => 'ချက်',
-    'sk' => 'စလိုဗီယန်',
-    'uk' => 'ယူကရိန်',
-    'el' => 'ဂရိ',
-    'ro' => 'ရိုမေးနီးယား',
-    'hr' => 'ခရိုအေးရှား',
-    'sr' => 'ဆားဘီးယား',
-    'bg' => 'ဘူဂေးရီးယား',
-    'lt' => 'လီသူဝန်း',
-    'lv' => 'လတ်ဗီးယား',
-    'et' => 'အက်စတိုး',
-    'nl' => 'နယ်ပယ်',
-    'no' => 'နော်ဝေး',
-    'sv' => 'ဆွီဒီးယန်',
-    'da' => 'ဒိန်းမတ်း',
-    'key' => 'ဘာသာရပ်',
-    'value' => 'တန်ဖိုး',
-];
-</file>
-
-<file path="resources/lang/pt_BR/messages.php">
-<?php
-
-return [
-    'ar' => 'árabe',
-    'en' => 'Inglês',
-    'pt_BR' => 'Português (Brasil)',
-    'my' => 'birmanês',
-    'id' => 'Indonésio',
-    'fr' => 'Francês',
-    'es' => 'Espanhol',
-    'de' => 'Alemão',
-    'it' => 'Italiano',
-    'ru' => 'Russo',
-    'zh' => 'Chinês',
-    'ja' => 'Japonês',
-    'ko' => 'Coreano',
-    'hi' => 'Hindi',
-    'th' => 'Tailandês',
-    'vi' => 'Vietnamita',
-    'fa' => 'Persa',
-    'ur' => 'Urdu',
-    'ms' => 'Malaio',
-    'fil' => 'Filipino',
-    'bn' => 'Bengali',
-    'pl' => 'Polonês',
-    'hu' => 'Húngaro',
-    'cs' => 'Tcheco',
-    'sk' => 'Eslovaco',
-    'uk' => 'Ucraniano',
-    'el' => 'Grego',
-    'ro' => 'Romeno',
-    'hr' => 'Croata',
-    'sr' => 'Sérvio',
-    'bg' => 'Búlgaro',
-    'lt' => 'Lituano',
-    'lv' => 'Letão',
-    'et' => 'Estoniano',
-    'nl' => 'Holandês',
-    'no' => 'Norueguês',
-    'sv' => 'Sueco',
-    'da' => 'Dinamarquês',
-    'fi' => 'Finlandês',
-    'key' => 'Língua',
-    'value' => 'Valor',
-];
-</file>
-
-<file path="src/Components/Translation.php">
-<?php
-
-namespace TomatoPHP\FilamentTranslationComponent\Components;
-
-use Filament\Forms\Components\KeyValue;
-
-class Translation extends KeyValue
-{
-    protected string $view = 'filament-translation-component::components.translation';
-
-    public array $lang = [];
-
-    public bool $textarea = false;
-
-    protected function setUp(): void
-    {
-        $this->keyLabel(trans('filament-translation-component::messages.key'));
-        $this->valueLabel(trans('filament-translation-component::messages.value'));
-        $this->editableKeys(false);
-        $this->addable(false);
-        $this->deletable(false);
-    }
-
-    public function textarea(bool $value = true): static
-    {
-        $this->textarea = $value;
-
-        return $this;
-    }
-
-    public function isTextarea(): bool
-    {
-        return $this->textarea;
-    }
-}
-</file>
-
 <file path="src/FilamentTranslationComponentServiceProvider.php">
 <?php
 
@@ -2712,27 +2921,27 @@ class FilamentTranslationComponentServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register Config file
-        $this->mergeConfigFrom(__DIR__.'/../config/filament-translation-component.php', 'filament-translation-component');
+        $this->mergeConfigFrom(__DIR__ . '/../config/filament-translation-component.php', 'filament-translation-component');
 
         // Publish Config
         $this->publishes([
-            __DIR__.'/../config/filament-translation-component.php' => config_path('filament-translation-component.php'),
+            __DIR__ . '/../config/filament-translation-component.php' => config_path('filament-translation-component.php'),
         ], 'filament-translation-component-config');
 
         // Register Lang
-        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-translation-component');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'filament-translation-component');
 
         // Publish Lang
         $this->publishes([
-            __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-translation-component'),
+            __DIR__ . '/../resources/lang' => base_path('lang/vendor/filament-translation-component'),
         ], 'filament-translation-component-lang');
 
         // Register views
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-translation-component');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-translation-component');
 
         // Publish Views
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/filament-translation-component'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/filament-translation-component'),
         ], 'filament-translation-component-views');
 
     }
@@ -2818,6 +3027,64 @@ return [
     'key' => 'Lingua',
     'value' => 'Valore',
 ];
+</file>
+
+<file path="src/Components/Translation.php">
+<?php
+
+namespace TomatoPHP\FilamentTranslationComponent\Components;
+
+use Filament\Forms\Components\KeyValue;
+
+class Translation extends KeyValue
+{
+    protected string $view = 'filament-translation-component::components.translation';
+
+    public array $lang = [];
+
+    public bool $textarea = false;
+
+    protected function setUp(): void
+    {
+        $this->keyLabel(trans('filament-translation-component::messages.key'));
+        $this->valueLabel(trans('filament-translation-component::messages.value'));
+        $this->editableKeys(false);
+        $this->addable(false);
+        $this->deletable(false);
+        $this->default(fn()=>$this->getTranslatedLocales());
+    }
+
+    public function getTranslatedLocales(): array
+    {
+        return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
+            return [$key => ""];
+        })->toArray();
+    }
+
+    public function lang(array $lang): static
+    {
+        $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getLang(): array
+    {
+        return $this->lang;
+    }
+
+    public function textarea(bool $value = true): static
+    {
+        $this->textarea = $value;
+
+        return $this;
+    }
+
+    public function isTextarea(): bool
+    {
+        return $this->textarea;
+    }
+}
 </file>
 
 <file path="resources/lang/ar/messages.php">
@@ -2994,10 +3261,13 @@ return [
 </file>
 
 <file path="README.md">
-![Cover](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/3x1io-tomato-translation-component.jpg)
+![Cover](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/fadymondy-tomato-translation-component.jpg)
 
 # Filament Translation Component
 
+[![Dependabot Updates](https://github.com/tomatophp/filament-translation-component/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/tomatophp/filament-translation-component/actions/workflows/dependabot/dependabot-updates)
+[![PHP Code Styling](https://github.com/tomatophp/filament-translation-component/actions/workflows/fix-php-code-styling.yml/badge.svg)](https://github.com/tomatophp/filament-translation-component/actions/workflows/fix-php-code-styling.yml)
+[![Tests](https://github.com/tomatophp/filament-translation-component/actions/workflows/tests.yml/badge.svg)](https://github.com/tomatophp/filament-translation-component/actions/workflows/tests.yml)
 [![Latest Stable Version](https://poser.pugx.org/tomatophp/filament-translation-component/version.svg)](https://packagist.org/packages/tomatophp/filament-translation-component)
 [![PHP Version Require](http://poser.pugx.org/tomatophp/filament-translation-component/require/php)](https://packagist.org/packages/tomatophp/filament-translation-component)
 [![License](https://poser.pugx.org/tomatophp/filament-translation-component/license.svg)](https://packagist.org/packages/tomatophp/filament-translation-component)

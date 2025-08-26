@@ -2879,6 +2879,7 @@ return [
                                     placeholder="{{ $valuePlaceholder }}"
                                     type="text"
                                     x-model="row.value"
+                                    x-on:input.debounce.{{ $debounce ?? '500ms' }}="updateState"
                                     class="fi-input"
                                 />
                                 @endif
@@ -3029,64 +3030,6 @@ return [
 ];
 </file>
 
-<file path="src/Components/Translation.php">
-<?php
-
-namespace TomatoPHP\FilamentTranslationComponent\Components;
-
-use Filament\Forms\Components\KeyValue;
-
-class Translation extends KeyValue
-{
-    protected string $view = 'filament-translation-component::components.translation';
-
-    public array $lang = [];
-
-    public bool $textarea = false;
-
-    protected function setUp(): void
-    {
-        $this->keyLabel(trans('filament-translation-component::messages.key'));
-        $this->valueLabel(trans('filament-translation-component::messages.value'));
-        $this->editableKeys(false);
-        $this->addable(false);
-        $this->deletable(false);
-        $this->default(fn()=>$this->getTranslatedLocales());
-    }
-
-    public function getTranslatedLocales(): array
-    {
-        return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
-            return [$key => ""];
-        })->toArray();
-    }
-
-    public function lang(array $lang): static
-    {
-        $this->lang = $lang;
-
-        return $this;
-    }
-
-    public function getLang(): array
-    {
-        return $this->lang;
-    }
-
-    public function textarea(bool $value = true): static
-    {
-        $this->textarea = $value;
-
-        return $this;
-    }
-
-    public function isTextarea(): bool
-    {
-        return $this->textarea;
-    }
-}
-</file>
-
 <file path="resources/lang/ar/messages.php">
 <?php
 
@@ -3181,6 +3124,77 @@ return [
 ];
 </file>
 
+<file path="src/Components/Translation.php">
+<?php
+
+namespace TomatoPHP\FilamentTranslationComponent\Components;
+
+use Illuminate\Support\Arr;
+use Filament\Forms\Components\KeyValue;
+
+class Translation extends KeyValue
+{
+    protected string $view = 'filament-translation-component::components.translation';
+
+    public array $lang = [];
+
+    public bool $textarea = false;
+
+    protected function setUp(): void
+    {
+        $this->keyLabel(trans('filament-translation-component::messages.key'));
+        $this->valueLabel(trans('filament-translation-component::messages.value'));
+        $this->editableKeys(false);
+        $this->addable(false);
+        $this->deletable(false);
+        $this->formatStateUsing(fn($state) => $this->getTranslatedLocales($state));
+        $this->default(fn () => $this->getTranslatedLocales());
+    }
+
+    public function getTranslatedLocales($state = null): array
+    {
+        if($state) {
+            return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) use ($state) {
+                if(collect($state)->has($key)) {
+                    return [$key => collect($state)->get($key)];
+                }
+                return [$key => ''];
+            })->toArray();
+        }
+        else {
+            return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
+                return [$key => ''];
+            })->toArray();
+        }
+
+    }
+
+    public function lang(array $lang): static
+    {
+        $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getLang(): array
+    {
+        return $this->lang;
+    }
+
+    public function textarea(bool $value = true): static
+    {
+        $this->textarea = $value;
+
+        return $this;
+    }
+
+    public function isTextarea(): bool
+    {
+        return $this->textarea;
+    }
+}
+</file>
+
 <file path="composer.json">
 {
     "name": "tomatophp/filament-translation-component",
@@ -3256,7 +3270,7 @@ return [
         "phpstan/phpstan-deprecation-rules": "^1.1||^2.0",
         "phpstan/phpstan-phpunit": "^1.3||^2.0"
     },
-    "version": "v4.0.0"
+    "version": "v4.0.1"
 }
 </file>
 

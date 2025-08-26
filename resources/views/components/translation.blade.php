@@ -143,6 +143,7 @@
                                     placeholder="{{ $valuePlaceholder }}"
                                     type="text"
                                     x-model="row.value"
+                                    x-on:input.debounce.{{ $debounce ?? '500ms' }}="updateState"
                                     class="fi-input"
                                 />
                                 @endif

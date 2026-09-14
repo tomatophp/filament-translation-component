@@ -20,10 +20,17 @@ Translation Component as a key/value to use it with Spatie Translatable Filament
 ![Dark Input](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/input-dark.png)
 
 
+## Compatibility
+
+| Package version | Filament | Laravel   | PHP  |
+|-----------------|----------|-----------|------|
+| 5.x             | 5.x      | 12.x, 13.x | 8.2+ |
+| 4.x             | 4.x      | 11.x, 12.x | 8.2+ |
+
 ## Installation
 
 ```bash
-composer require tomatophp/filament-translation-component
+composer require tomatophp/filament-translation-component:^5.0
 ```
 
 ## Using

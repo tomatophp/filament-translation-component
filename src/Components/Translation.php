@@ -14,31 +14,30 @@ class Translation extends KeyValue
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->keyLabel(trans('filament-translation-component::messages.key'));
         $this->valueLabel(trans('filament-translation-component::messages.value'));
         $this->editableKeys(false);
         $this->addable(false);
         $this->deletable(false);
-        $this->formatStateUsing(fn ($state) => $this->getTranslatedLocales($state));
-        $this->default(fn () => $this->getTranslatedLocales());
+        $this->formatStateUsing(fn (mixed $state): array => $this->getTranslatedLocales($state));
+        $this->default(fn (): array => $this->getTranslatedLocales());
     }
 
-    public function getTranslatedLocales($state = null): array
+    public function getTranslatedLocales(mixed $state = null): array
     {
-        if ($state) {
-            return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) use ($state) {
-                if (collect($state)->has($key)) {
-                    return [$key => collect($state)->get($key)];
-                }
+        $languages = collect(config('filament-translation-component.languages'));
 
-                return [$key => ''];
-            })->toArray();
-        } else {
-            return collect(config('filament-translation-component.languages'))->mapWithKeys(function ($item, $key) {
-                return [$key => ''];
-            })->toArray();
+        if (! $state) {
+            return $languages->mapWithKeys(fn (mixed $item, string $key): array => [$key => ''])->toArray();
         }
 
+        $state = collect($state);
+
+        return $languages->mapWithKeys(
+            fn (mixed $item, string $key): array => [$key => $state->has($key) ? $state->get($key) : '']
+        )->toArray();
     }
 
     public function lang(array $lang): static

@@ -14,6 +14,11 @@ Translation Component as a key/value to use it with Spatie Translatable Filament
 
 ## Screenshots
 
+Try it live on [demo.tomatophp.com](https://demo.tomatophp.com).
+
+![Demo dark](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/demo-dark.png)
+![Demo light](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/demo-light.png)
+
 ![Light Textarea](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/textarea-light.png)
 ![Dark Textarea](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/textarea-dark.png)
 ![Light Input](https://raw.githubusercontent.com/tomatophp/filament-translation-component/master/arts/input-light.png)

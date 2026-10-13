@@ -2,6 +2,12 @@
     "name": "tomatophp/filament-translation-component",
     "type": "library",
     "description": "Translation Component as a key/value to use it with Spatie Translatable FilamentPHP Plugin",
+    "homepage": "https://tomatophp.com/en/plugins/filament-translation-component",
+    "support": {
+        "issues": "https://github.com/tomatophp/filament-translation-component/issues",
+        "source": "https://github.com/tomatophp/filament-translation-component",
+        "docs": "https://tomatophp.com/en/plugins/filament-translation-component"
+    },
     "keywords": [
         "php",
         "laravel",
